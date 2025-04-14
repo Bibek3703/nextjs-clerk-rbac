@@ -84,3 +84,28 @@ npx shadcn@latest add button card form input toast dialog dropdown-menu separato
     utils.ts
 /public
 ```
+
+2. Authentication Setup with Clerk
+Sign up for Clerk account
+
+Create an account at clerk.com
+Create a new application
+Configure authentication providers:
+
+Email/password
+Google OAuth
+
+
+
+Configure environment variables
+Create .env.local file:
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_...
+CLERK_SECRET_KEY=sk_test_...
+NEXT_PUBLIC_CLERK_SIGN_IN_URL=/auth/sign-in
+NEXT_PUBLIC_CLERK_SIGN_UP_URL=/auth/sign-up
+NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL=/dashboard
+NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL=/onboarding
+
+[Next.js Quickstart (App Router)](https://clerk.com/docs/quickstarts/nextjs)
+
+[Configure the session token](https://clerk.com/docs/references/nextjs/basic-rbac#configure-the-session-token)
