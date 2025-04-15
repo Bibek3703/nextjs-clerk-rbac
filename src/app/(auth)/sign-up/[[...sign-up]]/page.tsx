@@ -1,11 +1,12 @@
+import SignUpForm from '@/components/auth/signup-form'
 import React from 'react'
 
-function SignInPage() {
+function SignUpPage() {
     return (
         <div>
-            SignIn Page
+            <SignUpForm />
         </div>
     )
 }
 
-export default SignInPage
+export default SignUpPage

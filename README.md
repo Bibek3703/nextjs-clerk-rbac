@@ -73,7 +73,6 @@ npx shadcn@latest add button card form input toast dialog dropdown-menu separato
       /[[...sign-in]]
       /[[...sign-up]]
   /(protected)
-    /onboarding
     /dashboard
     /organizations
     /settings
@@ -109,3 +108,20 @@ NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL=/onboarding
 [Next.js Quickstart (App Router)](https://clerk.com/docs/quickstarts/nextjs)
 
 [Configure the session token](https://clerk.com/docs/references/nextjs/basic-rbac#configure-the-session-token)
+
+[Create a global TypeScript definition](https://clerk.com/docs/references/nextjs/basic-rbac#create-a-global-type-script-definition)
+
+```typescript
+export { }
+
+// Create a type for the roles
+export type Roles = 'admin' | 'member'
+
+declare global {
+    interface CustomJwtSessionClaims {
+        metadata: {
+            role?: Roles,
+        }
+    }
+}
+```
