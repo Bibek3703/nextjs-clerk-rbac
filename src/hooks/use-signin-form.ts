@@ -3,55 +3,50 @@
 import { useForm } from 'react-hook-form'
 import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useSignUp } from '@clerk/clerk-react';
 import React from 'react';
-import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
+import { useSignIn } from '@clerk/clerk-react';
+import { useRouter } from 'next/navigation';
 
 const formSchema = z.object({
-    code: z.string().min(6, { message: "Password is required" }),
+    emailAddress: z.string().email({ message: "Please enter a valid email address" }),
+    password: z.string().min(6, { message: "Password is required" }),
 });
 
-type VerificationFormPropsType = {
-    redirectUrl: string
-}
-
-function useVerificationForm({ redirectUrl = "/" }: VerificationFormPropsType = { redirectUrl: "/" }) {
-    const { isLoaded, signUp, setActive } = useSignUp()
-    const [verifying, setVerifying] = React.useState(false)
+function useSignInForm() {
+    const { isLoaded, signIn, setActive } = useSignIn()
     const [loading, setLoading] = React.useState(false)
     const router = useRouter()
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
-            code: ""
+            emailAddress: "",
+            password: ""
         },
     });
 
+
     const onSubmit = async (values: z.infer<typeof formSchema>) => {
         if (!isLoaded) return
-
         setLoading(true)
-
         try {
-            // Use the code the user provided to attempt verification
-            const signUpAttempt = await signUp.attemptEmailAddressVerification({
-                ...values,
+            const signInAttempt = await signIn.create({
+                identifier: values.emailAddress,
+                password: values.password,
             })
 
-            // If verification was completed, set the session to active
+            // If sign-in process is complete, set the created session as active
             // and redirect the user
-            if (signUpAttempt.status === 'complete') {
-                await setActive({ session: signUpAttempt.createdSessionId })
-                if (redirectUrl) {
-                    router.push(redirectUrl)
-                }
+            if (signInAttempt.status === 'complete') {
+                await setActive({ session: signInAttempt.createdSessionId })
+                router.push('/dashboard')
             } else {
                 // If the status is not complete, check why. User may need to
                 // complete further steps.
-                console.error(JSON.stringify(signUpAttempt, null, 2))
+                console.error(JSON.stringify(signInAttempt, null, 2))
             }
+
         } catch (err: any) {
             // See https://clerk.com/docs/custom-flows/error-handling
             // for more info on error handling
@@ -62,13 +57,11 @@ function useVerificationForm({ redirectUrl = "/" }: VerificationFormPropsType = 
         }
     }
 
-
     return {
         form,
         onSubmit,
-        verifying,
-        loading
+        loading,
     }
 }
 
-export default useVerificationForm
+export default useSignInForm

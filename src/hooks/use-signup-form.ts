@@ -5,7 +5,6 @@ import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useSignUp } from '@clerk/clerk-react';
 import React from 'react';
-import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 
 const formSchema = z.object({

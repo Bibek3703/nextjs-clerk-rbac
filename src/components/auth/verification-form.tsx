@@ -5,15 +5,16 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui
 import { cn } from '@/lib/utils'
 import { Form, FormControl, FormDescription, FormField, FormItem, FormMessage } from '../ui/form'
 import { Button } from '../ui/button'
-import useVerificationForm from '@/hooks/use-verification-form'
+import useVerification from '@/hooks/use-verification'
 import { InputOTP, InputOTPGroup, InputOTPSlot } from '../ui/input-otp'
 import { Loader2 } from 'lucide-react'
 
 function VerificationForm({
     className,
+    redirectUrl = "/",
     ...props
-}: React.ComponentPropsWithoutRef<"div">) {
-    const { form, loading, onSubmit } = useVerificationForm({ redirectUrl: "/onboarding" })
+}: React.ComponentPropsWithoutRef<"div"> & { redirectUrl?: string }) {
+    const { form, loading, handleSignUpVerification } = useVerification({ redirectUrl })
     return (
         <div className={cn("flex flex-col gap-6", className)} {...props}>
             <Card>
@@ -25,7 +26,7 @@ function VerificationForm({
                 </CardHeader>
                 <CardContent>
                     <Form {...form}>
-                        <form onSubmit={form.handleSubmit(onSubmit)}>
+                        <form onSubmit={form.handleSubmit(handleSignUpVerification)}>
                             <div className="grid gap-6 text-center">
                                 <FormField
                                     control={form.control}
