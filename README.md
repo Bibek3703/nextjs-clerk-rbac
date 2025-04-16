@@ -289,7 +289,7 @@ NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL=/onboarding
 ## 5. Webhook Integration for Data Sync
   ### 1. [Set up ngrok](https://clerk.com/docs/webhooks/sync-data#set-up-ngrok)
   ### 2. [Set up a webhook endpoint](https://clerk.com/docs/webhooks/sync-data#set-up-a-webhook-endpoint)
-    [Create Endpoints](/create_endpoints.png)
+  [Create Endpoints](/create_endpoints.png)
   ### 3. [Add your Signing Secret to .env](https://clerk.com/docs/webhooks/sync-data#add-your-signing-secret-to-env)
   ```.env
     CLERK_WEBHOOK_SIGNING_SECRET=whsec_123
