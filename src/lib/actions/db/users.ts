@@ -26,13 +26,33 @@ export async function createUser(user: InsertUser) {
     if (!user?.clerkId) {
         throw new Error("Clerk user ID is required");
     }
-
     await db.insert(users)
         .values({
             ...user,
             createdAt: new Date(),
             updatedAt: new Date(),
         });
-
     return { message: "User created" }
+}
+
+export async function updateUserByClerkId(user: Partial<InsertUser>, clerkId: string) {
+    if (!clerkId) {
+        throw new Error("Clerk user ID is required");
+    }
+    await db.update(users)
+        .set({
+            ...user,
+            updatedAt: new Date(),
+        })
+        .where(eq(users.clerkId, clerkId));
+    return { message: "User updated" }
+}
+
+export async function deleteUserByClerkId(clerkId: string) {
+    if (!clerkId) {
+        throw new Error("Clerk user ID is required");
+    }
+    await db.delete(users)
+        .where(eq(users.clerkId, clerkId));
+    return { message: "User deleted" }
 }
