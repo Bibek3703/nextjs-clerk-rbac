@@ -16,12 +16,8 @@ This guide outlines the step-by-step process to build a full-stack todo applicat
 2. [Authentication Setup with Clerk](#2-authentication-setup-with-clerk)
 3. [Database Setup with NeonDB](#3-database-setup-with-neondb)
 4. [Schema Design & Drizzle Integration](#4-schema-design--drizzle-integration)
-5. [Organization & User Management](#5-organization--user-management)
-6. [Role-Based Access Control Implementation](#6-role-based-access-control-implementation)
-7. [Webhook Integration for Data Sync](#7-webhook-integration-for-data-sync)
-8. [Todo Application Features](#8-todo-application-features)
-9. [Frontend Implementation with shadcn/ui](#9-frontend-implementation-with-shadcnui)
-10. [Deployment & Testing](#10-deployment--testing)
+5. [Webhook Integration for Data Sync](#7-webhook-integration-for-data-sync)
+6. [Deployment & Testing](#10-deployment--testing)
 
 ## 1. Project Setup
 
@@ -81,6 +77,8 @@ npx shadcn@latest add button card form input toast dialog dropdown-menu separato
     /settings
     /todos
   /components
+    /auth
+    /dashboard
     /ui
   /db
     /schema.ts
@@ -125,10 +123,12 @@ NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL=/onboarding
 ### [Create a global TypeScript definition](https://clerk.com/docs/references/nextjs/basic-rbac#create-a-global-type-script-definition)
 
 ```typescript
+  import { roles } from "@/db/schema"
+
   export { }
 
   // Create a type for the roles
-  export type Roles = 'admin' | 'member'
+  export type Roles = typeof roles
 
   declare global {
       interface CustomJwtSessionClaims {
