@@ -17,7 +17,7 @@ function useOauthSignIn() {
             return signIn
                 .authenticateWithRedirect({
                     strategy,
-                    redirectUrl: '/sso-callback',
+                    redirectUrl: '/sign-in/sso-callback',
                     redirectUrlComplete: '/dashboard',
                 })
                 .then((res) => {

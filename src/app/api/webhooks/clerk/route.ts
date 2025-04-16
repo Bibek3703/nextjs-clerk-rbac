@@ -2,9 +2,10 @@ import { Webhook } from "svix";
 import { headers } from "next/headers";
 import { UserJSON, WebhookEvent } from "@clerk/nextjs/server";
 import { NextRequest, NextResponse } from "next/server";
+import { createUser } from "@/lib/actions/db/users";
 
 export async function POST(req: NextRequest) {
-    const SIGNING_SECRET = process.env.CLERK_WEBHOOK_SECRET || "";
+    const SIGNING_SECRET = process.env.CLERK_WEBHOOK_SIGNING_SECRET || "";
 
     if (!SIGNING_SECRET) {
         console.error("Error: Missing signing secret");
@@ -60,6 +61,13 @@ export async function POST(req: NextRequest) {
             case "user.created": {
                 if (id) {
                     const clerkUser = evt.data as UserJSON & { profile_image_url: string };
+                    await createUser({
+                        clerkId: clerkUser.id,
+                        email: clerkUser.email_addresses[0].email_address,
+                        firstName: clerkUser?.first_name || "",
+                        lastName: clerkUser?.last_name || "",
+                        imageUrl: clerkUser?.image_url || "",
+                    })
                     break;
                 }
             }

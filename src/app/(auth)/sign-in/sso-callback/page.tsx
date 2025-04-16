@@ -7,6 +7,5 @@ export default function Page() {
     // This is the final step in the custom OAuth flow.
     return <>
         <AuthenticateWithRedirectCallback />
-        <div id="clerk-captcha" className="w-full flex justify-center" />
     </>
 }

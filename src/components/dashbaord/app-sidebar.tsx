@@ -3,24 +3,13 @@
 import * as React from "react"
 import {
     AudioWaveform,
-    BookOpen,
-    Bot,
-    BriefcaseBusiness,
     Calendar1,
     Command,
-    Frame,
     GalleryVerticalEnd,
     LayoutDashboard,
-    Map,
-    PieChart,
     Settings2,
-    SquareTerminal,
 } from "lucide-react"
 
-// import { NavMain } from "@/components/nav-main"
-// import { NavProjects } from "@/components/nav-projects"
-// import { NavUser } from "@/components/nav-user"
-// import { TeamSwitcher } from "@/components/team-switcher"
 import {
     Sidebar,
     SidebarContent,
@@ -31,6 +20,7 @@ import {
 import { TeamSwitcher } from "./team-switcher"
 import { NavUser } from "./nav-user"
 import { NavMain } from "./nav-main"
+import { useCurrentUser } from "@/hooks/use-users"
 
 // This is sample data.
 const data = {
@@ -62,11 +52,7 @@ const data = {
             url: "/dashboard",
             icon: LayoutDashboard,
         },
-        {
-            title: "Organizations",
-            url: "/organizations",
-            icon: BriefcaseBusiness,
-        },
+
         {
             title: "Todos",
             url: "/todos",
@@ -82,8 +68,8 @@ const data = {
                     url: "#",
                 },
                 {
-                    title: "Team",
-                    url: "#",
+                    title: "Teams",
+                    url: "/teams",
                 },
                 {
                     title: "Billing",
@@ -99,6 +85,11 @@ const data = {
 }
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+    const user = useCurrentUser()
+
+    console.log({ user })
+
+    console.log({ user })
     return (
         <Sidebar collapsible="icon" {...props}>
             <SidebarHeader>

@@ -18,6 +18,9 @@ export const users = pgTable("users", {
     updatedAt: timestamp("updated_at").defaultNow().notNull()
 });
 
+export type User = typeof users.$inferSelect;
+export type InsertUser = typeof users.$inferInsert;
+
 // Organizations Table
 export const organizations = pgTable("organizations", {
     id: uuid("id").primaryKey().defaultRandom(),
@@ -28,6 +31,9 @@ export const organizations = pgTable("organizations", {
     updatedAt: timestamp("updated_at").defaultNow().notNull()
 });
 
+export type Organization = typeof organizations.$inferSelect;
+export type InsertOrganization = typeof organizations.$inferInsert;
+
 // Organization to User Junction Table
 export const organizationsToUsers = pgTable("organizations_to_users", {
     id: uuid("id").primaryKey().defaultRandom(),
@@ -36,6 +42,9 @@ export const organizationsToUsers = pgTable("organizations_to_users", {
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at").defaultNow().notNull()
 });
+
+export type OrganizationToUser = typeof organizations.$inferSelect;
+export type InsertOrganizationToUser = typeof organizations.$inferInsert;
 
 // Todos Table
 export const todos = pgTable("todos", {
@@ -50,6 +59,9 @@ export const todos = pgTable("todos", {
     updatedAt: timestamp("updated_at").defaultNow().notNull()
 });
 
+export type Todo = typeof todos.$inferSelect;
+export type InsertTodo = typeof todos.$inferInsert;
+
 // Labels Table
 export const labels = pgTable("labels", {
     id: uuid("id").primaryKey().defaultRandom(),
@@ -59,6 +71,9 @@ export const labels = pgTable("labels", {
     updatedAt: timestamp("updated_at").defaultNow().notNull()
 });
 
+export type Label = typeof labels.$inferSelect;
+export type InsertLabel = typeof labels.$inferInsert;
+
 // Todo to Label Junction Table
 export const todosToLabels = pgTable("todos_to_labels", {
     id: uuid("id").primaryKey().defaultRandom(),
@@ -67,6 +82,9 @@ export const todosToLabels = pgTable("todos_to_labels", {
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at").defaultNow().notNull()
 });
+
+export type TodoToLabel = typeof todosToLabels.$inferSelect;
+export type InsertTodoToLabel = typeof todosToLabels.$inferInsert;
 
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
