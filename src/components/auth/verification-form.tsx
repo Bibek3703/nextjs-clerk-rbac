@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui
 import { cn } from '@/lib/utils'
 import { Form, FormControl, FormDescription, FormField, FormItem, FormMessage } from '../ui/form'
 import { Button } from '../ui/button'
-import useVerification from '@/hooks/use-verification'
+import useVerification from '@/hooks/forms/use-verification'
 import { InputOTP, InputOTPGroup, InputOTPSlot } from '../ui/input-otp'
 import { Loader2 } from 'lucide-react'
 

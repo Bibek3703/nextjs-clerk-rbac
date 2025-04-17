@@ -55,16 +55,16 @@ const data = {
         },
         {
             title: "Settings",
-            url: "#",
+            url: "/settings",
             icon: Settings2,
             items: [
                 {
                     title: "General",
-                    url: "#",
+                    url: "/settings",
                 },
                 {
                     title: "Teams",
-                    url: "/teams",
+                    url: "/settings/teams",
                 },
                 {
                     title: "Billing",
@@ -85,7 +85,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     return (
         <Sidebar collapsible="icon" {...props}>
             <SidebarHeader>
-                <TeamSwitcher teams={data.teams} />
+                <TeamSwitcher teams={[]} />
             </SidebarHeader>
             <SidebarContent>
                 <NavMain items={data.navMain} />

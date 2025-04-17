@@ -7,4 +7,5 @@ export async function handleAuth() {
     if (!session.userId) {
         throw new Error('User is not authorized');
     }
+    return session
 }

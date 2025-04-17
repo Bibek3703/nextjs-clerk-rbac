@@ -3,7 +3,7 @@
 import React from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card'
 import { cn } from '@/lib/utils'
-import useSignInForm from '@/hooks/use-signin-form'
+import useSignInForm from '@/hooks/forms/use-signin-form'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '../ui/form'
 import SocialLoginButtons from './social-login-buttons'
 import { Input } from '../ui/input'
