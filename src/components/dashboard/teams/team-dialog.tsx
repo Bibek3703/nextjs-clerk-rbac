@@ -10,16 +10,20 @@ import {
     DialogTrigger,
 } from "@/components/ui/dialog"
 import TeamForm from "./team-form"
+import { DialogProvider, useDialog } from "@/contexts/dialog-context"
+import { Organization } from "@/db/schema"
 
 type DialogTeamProps = {
+    team?: Organization,
     title: string,
     description?: string,
     trigger: React.ReactNode | string,
 }
 
-export function DialogTeam({ title, description, trigger }: DialogTeamProps) {
+export function DialogTeam({ team, title, description, trigger }: DialogTeamProps) {
+    const { open, setOpen } = useDialog()
     return (
-        <Dialog>
+        <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
                 {trigger}
             </DialogTrigger>
@@ -31,7 +35,7 @@ export function DialogTeam({ title, description, trigger }: DialogTeamProps) {
                     </DialogDescription>}
                 </DialogHeader>
                 <div className="grid gap-4 py-4">
-                    <TeamForm />
+                    <TeamForm team={team} />
                 </div>
             </DialogContent>
         </Dialog>

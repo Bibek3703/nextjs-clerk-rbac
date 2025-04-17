@@ -1,8 +1,11 @@
 import { Webhook } from "svix";
 import { headers } from "next/headers";
-import { UserJSON, WebhookEvent } from "@clerk/nextjs/server";
+import { OrganizationMembershipJSON, WebhookEvent } from "@clerk/nextjs/server";
 import { NextRequest, NextResponse } from "next/server";
 import { createUser, deleteUserByClerkId, updateUserByClerkId } from "@/lib/actions/db/users";
+import { createUserOrganizations, deleteOrganizationByClerkOrgId, updateUserOrganizations } from "@/lib/actions/db/organizations";
+import { updateUserPublicMetadata } from "@/lib/actions/clerk/users";
+import { Role } from "@/db/schema";
 
 export async function POST(req: NextRequest) {
     const SIGNING_SECRET = process.env.CLERK_WEBHOOK_SIGNING_SECRET || "";
@@ -88,6 +91,55 @@ export async function POST(req: NextRequest) {
                     await deleteUserByClerkId(id)
                 }
                 break;
+            }
+            case "organization.created": {
+                const clerkOrg = evt.data;
+                if (id && clerkOrg && clerkOrg.created_by) {
+                    await createUserOrganizations({
+                        name: clerkOrg.name,
+                        slug: clerkOrg.slug,
+                        clerkOrgId: id,
+                        membersCount: 1,
+                        clerkId: clerkOrg.created_by,
+                        imageUrl: clerkOrg?.image_url || ""
+                    })
+                }
+                break;
+            }
+            case "organization.updated": {
+                const clerkOrg = evt.data;
+                if (id && clerkOrg && clerkOrg.created_by) {
+
+                    await updateUserOrganizations(id, {
+                        name: clerkOrg.name,
+                        slug: clerkOrg.slug,
+                        clerkOrgId: id,
+                        clerkId: clerkOrg.created_by,
+                        imageUrl: clerkOrg?.image_url || ""
+                    })
+                }
+                break;
+            }
+            case "organization.deleted": {
+                if (id) {
+                    console.log(`Deleting user with ID ${id}`);
+                    await deleteOrganizationByClerkOrgId(id)
+                }
+                break;
+            }
+            case "organizationMembership.created":
+            case "organizationMembership.updated": {
+                const clerkOrgMembership = evt.data as OrganizationMembershipJSON & { role_name: Role };
+                console.log({ clerkOrgMembership })
+                await updateUserPublicMetadata(clerkOrgMembership.public_user_data.user_id, {
+                    role: clerkOrgMembership.role,
+                })
+                await updateUserByClerkId({
+                    role: clerkOrgMembership?.role_name,
+                }, clerkOrgMembership.public_user_data.user_id)
+                await updateUserOrganizations(clerkOrgMembership.organization.id, {
+                    membersCount: clerkOrgMembership?.organization?.members_count || 0,
+                })
             }
             default:
                 console.log(

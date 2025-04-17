@@ -2,6 +2,7 @@
 
 import { Organization } from "@/db/schema"
 import { ColumnDef } from "@tanstack/react-table"
+import TeamActions from "./team-actions"
 
 export const columns: ColumnDef<Organization>[] = [
     {
@@ -9,11 +10,24 @@ export const columns: ColumnDef<Organization>[] = [
         header: "Name",
     },
     {
-        accessorKey: "id",
+        accessorKey: "slug",
+        header: "Slug",
+    },
+    {
+        accessorKey: "clerkOrgId",
         header: "ID",
     },
-    // {
-    //     accessorKey: "amount",
-    //     header: "Amount",
-    // },
+    {
+        accessorKey: "membersCount",
+        header: "Members",
+    },
+    {
+        id: "actions",
+        enableHiding: false,
+        cell: ({ row }) => {
+            const team = row.original
+
+            return <TeamActions team={team} />
+        },
+    },
 ]

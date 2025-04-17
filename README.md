@@ -305,7 +305,7 @@ NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL=/onboarding
     import { headers } from "next/headers";
     import { UserJSON, WebhookEvent } from "@clerk/nextjs/server";
     import { NextRequest, NextResponse } from "next/server";
-    import { createUser } from "@/lib/actions/db/users";
+    import { createUser, deleteUserByClerkId, updateUserByClerkId } from "@/lib/actions/db/users";
 
     export async function POST(req: NextRequest) {
         const SIGNING_SECRET = process.env.CLERK_WEBHOOK_SIGNING_SECRET || "";
@@ -359,11 +359,10 @@ NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL=/onboarding
         try {
 
             console.log("eventType", eventType);
-            console.log("id", id);
             switch (eventType) {
                 case "user.created": {
-                    if (id) {
-                        const clerkUser = evt.data as UserJSON & { profile_image_url: string };
+                    const clerkUser = evt.data;
+                    if (clerkUser) {
                         await createUser({
                             clerkId: clerkUser.id,
                             email: clerkUser.email_addresses[0].email_address,
@@ -371,27 +370,31 @@ NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL=/onboarding
                             lastName: clerkUser?.last_name || "",
                             imageUrl: clerkUser?.image_url || "",
                         })
-                        break;
                     }
+                    break;
                 }
                 case "user.updated": {
-                    if (id) {
-                        const clerkUser = evt.data as UserJSON & { profile_image_url: string };
-                        break;
+                    const clerkUser = evt.data;
+                    if (clerkUser) {
+                        await updateUserByClerkId({
+                            email: clerkUser.email_addresses[0].email_address,
+                            firstName: clerkUser?.first_name || "",
+                            lastName: clerkUser?.last_name || "",
+                            imageUrl: clerkUser?.image_url || "",
+                        }, clerkUser.id,)
                     }
+                    break;
                 }
                 case "user.deleted": {
                     if (id) {
                         console.log(`Deleting user with ID ${id}`);
-                        break;
+                        await deleteUserByClerkId(id)
                     }
+                    break;
                 }
                 default:
                     console.log(
-                        `Received webhook with ID ${id} and event type of ${eventType}`,
-                    );
-                    console.log(
-                        `Received Data: ${JSON.stringify(evt.data, null, 2)}`,
+                        `Received webhook with ID ${id} and event type of ${eventType} Data: ${JSON.stringify(evt.data, null, 2)}`,
                     );
                     break;
             }

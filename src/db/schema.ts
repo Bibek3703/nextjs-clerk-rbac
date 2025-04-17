@@ -1,9 +1,9 @@
 import { relations } from "drizzle-orm";
-import { boolean, pgEnum, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
+import { boolean, integer, pgEnum, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
 
-export const roles = ["Admin", "Member"] as const
+export type Role = "Admin" | "Member"
 
-export const roleEnum = pgEnum("role", roles);
+export const roleEnum = pgEnum("role", ["Admin", "Member"]);
 
 // Users Table
 export const users = pgTable("users", {
@@ -24,9 +24,12 @@ export type InsertUser = typeof users.$inferInsert;
 // Organizations Table
 export const organizations = pgTable("organizations", {
     id: uuid("id").primaryKey().defaultRandom(),
-    clerkId: text("clerk_id").unique().notNull(),
+    clerkId: text("clerk_id").notNull(),
+    clerkOrgId: text("clerk_org_id").unique().notNull(),
     name: text("name").notNull(),
+    slug: text("slug").notNull(),
     imageUrl: text("image_url"),
+    membersCount: integer("members_count"),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at").defaultNow().notNull()
 });

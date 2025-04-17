@@ -3,12 +3,29 @@
 import { Button } from '@/components/ui/button'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
+import { useDialog } from '@/contexts/dialog-context'
+import { Organization } from '@/db/schema'
 import useTeamForm from '@/hooks/forms/use-team-form'
 import { Loader2 } from 'lucide-react'
-import React from 'react'
+import React, { useEffect } from 'react'
 
-function TeamForm() {
-    const { form, onSubmit, isPending } = useTeamForm()
+function TeamForm({ team }: { team?: Organization }) {
+    const { form, onSubmit, isPending, isSuccess } = useTeamForm(team)
+    const { setOpen } = useDialog()
+
+    useEffect(() => {
+        if (!isPending && isSuccess) {
+            setOpen(false)
+        }
+    }, [isSuccess, isPending])
+
+    useEffect(() => {
+        if (team) {
+            form.reset({
+                name: team.name
+            })
+        }
+    }, [team])
 
     return (
         <Form {...form}>
@@ -32,7 +49,7 @@ function TeamForm() {
                 />
                 <Button type="submit" className="w-full">
                     {isPending && <Loader2 className='animate-spin w-3 h-3' />}
-                    <span>Save</span>
+                    <span>{team ? "Update team" : "Save team"}</span>
                 </Button>
             </form>
         </Form>
