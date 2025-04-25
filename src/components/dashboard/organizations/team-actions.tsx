@@ -2,19 +2,17 @@
 
 import React, { useEffect } from 'react'
 import { Button } from "@/components/ui/button"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Loader2, MoreHorizontal, Trash2, View } from 'lucide-react'
 import { Organization } from '@/db/schema'
 import { DialogProvider, useDialog } from '@/contexts/dialog-context'
-import { DialogTeam } from './team-dialog'
-import { useDeleteTeam } from '@/hooks/use-teams'
-import { useAuth } from '@clerk/nextjs'
+import { useDeleteOrganization } from '@/hooks/use-organizations'
+import { DialogOrganization } from './org-dialog'
 
 
 function TeamActions({ team }: { team: Organization }) {
-    const { userId } = useAuth()
     const { setOpen } = useDialog()
-    const { mutate: deleteTeam, isPending, isSuccess } = useDeleteTeam()
+    const { mutate: deleteOrganization, isPending, isSuccess } = useDeleteOrganization()
 
     useEffect(() => {
         if (!isPending && isSuccess) {
@@ -34,20 +32,20 @@ function TeamActions({ team }: { team: Organization }) {
                 <DropdownMenuLabel>Actions</DropdownMenuLabel>
                 <DropdownMenuItem asChild>
                     <DialogProvider>
-                        <DialogTeam
+                        <DialogOrganization
                             team={team}
-                            title="Team"
+                            title="Organization"
                             trigger={<Button variant="ghost" size="sm">
                                 <View />
-                                <span>View Team</span>
+                                <span>View Organization</span>
                             </Button>}
                         />
                     </DialogProvider>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                    <Button variant="ghost" size="sm" onClick={() => deleteTeam(team.clerkOrgId)}>
+                    <Button variant="ghost" size="sm" onClick={() => deleteOrganization(team.clerkOrgId)}>
                         {isPending ? <Loader2 className='animate-spin w-3 h-3' /> : <Trash2 className='text-destructive' />}
-                        <span>Delete Team</span>
+                        <span>Delete Organization</span>
                     </Button>
                 </DropdownMenuItem>
             </DropdownMenuContent>

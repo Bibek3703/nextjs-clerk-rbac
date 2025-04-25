@@ -1,16 +1,16 @@
 "use client"
 import React from 'react'
-import { DataTable } from '../data-table'
 import TableHeader from './header-component'
 import { Table } from '@tanstack/react-table'
 import { Organization } from '@/db/schema'
 import { columns } from './columns'
-import { useTeams } from '@/hooks/use-teams'
 import { useAuth } from '@clerk/nextjs'
+import { useOrganizations } from '@/hooks/use-organizations'
+import { DataTable } from '../data-table'
 
-function TeamDataTable() {
+function OrgDataTable() {
     const { userId } = useAuth()
-    const { data } = useTeams(userId)
+    const { data } = useOrganizations(userId)
 
     const renderHeaderComponent = (table: Table<Organization>) => {
         return <TableHeader table={table} />
@@ -25,4 +25,4 @@ function TeamDataTable() {
     )
 }
 
-export default TeamDataTable
+export default OrgDataTable

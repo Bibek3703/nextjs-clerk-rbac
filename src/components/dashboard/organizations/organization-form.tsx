@@ -5,12 +5,12 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input'
 import { useDialog } from '@/contexts/dialog-context'
 import { Organization } from '@/db/schema'
-import useTeamForm from '@/hooks/forms/use-team-form'
+import useOrganizationForm from '@/hooks/forms/use-org-form'
 import { Loader2 } from 'lucide-react'
 import React, { useEffect } from 'react'
 
-function TeamForm({ team }: { team?: Organization }) {
-    const { form, onSubmit, isPending, isSuccess } = useTeamForm(team)
+function OrganizationForm({ team }: { team?: Organization }) {
+    const { form, onSubmit, isPending, isSuccess } = useOrganizationForm(team)
     const { setOpen } = useDialog()
 
     useEffect(() => {
@@ -49,11 +49,11 @@ function TeamForm({ team }: { team?: Organization }) {
                 />
                 <Button type="submit" className="w-full">
                     {isPending && <Loader2 className='animate-spin w-3 h-3' />}
-                    <span>{team ? "Update team" : "Save team"}</span>
+                    <span>{team ? "Update organization" : "Save organization"}</span>
                 </Button>
             </form>
         </Form>
     )
 }
 
-export default TeamForm
+export default OrganizationForm

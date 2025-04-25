@@ -17,10 +17,11 @@ import {
     SidebarHeader,
     SidebarRail,
 } from "@/components/ui/sidebar"
-import { TeamSwitcher } from "./team-switcher"
 import { NavUser } from "./nav-user"
 import { NavMain } from "./nav-main"
 import { useCurrentUser } from "@/hooks/use-users"
+import { OrganizationSwitcher } from "./organization-switcher"
+import { useOrganizations } from "@/hooks/use-organizations"
 
 // This is sample data.
 const data = {
@@ -63,8 +64,8 @@ const data = {
                     url: "/settings",
                 },
                 {
-                    title: "Teams",
-                    url: "/settings/teams",
+                    title: "Organizations",
+                    url: "/settings/organizations",
                 },
                 {
                     title: "Billing",
@@ -81,11 +82,12 @@ const data = {
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     const { data: user } = useCurrentUser()
+    const { data: teams } = useOrganizations(user?.clerkId)
 
     return (
         <Sidebar collapsible="icon" {...props}>
             <SidebarHeader>
-                <TeamSwitcher teams={[]} />
+                <OrganizationSwitcher teams={teams && teams?.length > 0 ? teams?.map((team) => ({ name: team.name, slug: team.slug, logo: team.imageUrl })) : []} />
             </SidebarHeader>
             <SidebarContent>
                 <NavMain items={data.navMain} />

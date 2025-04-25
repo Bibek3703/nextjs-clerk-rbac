@@ -76,7 +76,7 @@ export async function getUserOrganizations(clerkId: string): Promise<Organizatio
     }
 
     const result = await db.select().from(organizations).where(eq(organizations.clerkId, clerkId)).orderBy(desc(organizations.createdAt))
-
+    console.log({ result })
     if (result?.length) {
         return result
     }

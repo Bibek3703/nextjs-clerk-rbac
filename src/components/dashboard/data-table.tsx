@@ -16,7 +16,6 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table"
-import HeaderComponent from "./teams/header-component"
 
 interface DataTableProps<TData, TValue> {
     columns: ColumnDef<TData, TValue>[]

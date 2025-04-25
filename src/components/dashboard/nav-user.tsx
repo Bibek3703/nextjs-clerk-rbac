@@ -30,6 +30,8 @@ import {
     useSidebar,
 } from "@/components/ui/sidebar"
 import { User } from "@/db/schema"
+import { useClerk } from "@clerk/nextjs"
+import { useCurrentOrganization } from "@/hooks/use-organizations"
 
 export function NavUser({
     user,
@@ -37,9 +39,15 @@ export function NavUser({
     user?: User | null
 }) {
     const { isMobile } = useSidebar()
+    const { signOut } = useClerk()
 
     if (!user) {
         return null
+    }
+
+    const handleSignOut = async () => {
+        await signOut()
+        useCurrentOrganization.getState().clearStore()
     }
 
     return (
@@ -103,7 +111,7 @@ export function NavUser({
                             </DropdownMenuItem>
                         </DropdownMenuGroup>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem>
+                        <DropdownMenuItem onClick={handleSignOut}>
                             <LogOut />
                             Log out
                         </DropdownMenuItem>

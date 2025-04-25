@@ -9,7 +9,7 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog"
-import TeamForm from "./team-form"
+import TeamForm from "./organization-form"
 import { DialogProvider, useDialog } from "@/contexts/dialog-context"
 import { Organization } from "@/db/schema"
 
@@ -20,7 +20,7 @@ type DialogTeamProps = {
     trigger: React.ReactNode | string,
 }
 
-export function DialogTeam({ team, title, description, trigger }: DialogTeamProps) {
+export function DialogOrganization({ team, title, description, trigger }: DialogTeamProps) {
     const { open, setOpen } = useDialog()
     return (
         <Dialog open={open} onOpenChange={setOpen}>
