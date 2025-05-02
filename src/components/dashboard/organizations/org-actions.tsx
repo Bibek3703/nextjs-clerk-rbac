@@ -8,11 +8,13 @@ import { Organization } from '@/db/schema'
 import { DialogProvider, useDialog } from '@/contexts/dialog-context'
 import { useDeleteOrganization } from '@/hooks/use-organizations'
 import { DialogOrganization } from './org-dialog'
+import { useAuth } from '@clerk/nextjs'
 
 
-function TeamActions({ team }: { team: Organization }) {
+function OrganizationActions({ team }: { team: Organization }) {
+    const { userId } = useAuth()
     const { setOpen } = useDialog()
-    const { mutate: deleteOrganization, isPending, isSuccess } = useDeleteOrganization()
+    const { mutate: deleteOrganization, isPending, isSuccess } = useDeleteOrganization(userId)
 
     useEffect(() => {
         if (!isPending && isSuccess) {
@@ -43,7 +45,7 @@ function TeamActions({ team }: { team: Organization }) {
                     </DialogProvider>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                    <Button variant="ghost" size="sm" onClick={() => deleteOrganization(team.clerkOrgId)}>
+                    <Button variant="ghost" size="sm" onClick={() => deleteOrganization(team.id)}>
                         {isPending ? <Loader2 className='animate-spin w-3 h-3' /> : <Trash2 className='text-destructive' />}
                         <span>Delete Organization</span>
                     </Button>
@@ -53,4 +55,4 @@ function TeamActions({ team }: { team: Organization }) {
     )
 }
 
-export default TeamActions
+export default OrganizationActions

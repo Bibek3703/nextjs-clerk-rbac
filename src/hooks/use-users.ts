@@ -1,29 +1,25 @@
 "use client"
 
-import { User } from "@/db/schema";
-import { getUserById } from "@/lib/actions/db/users"
-import { useAuth } from "@clerk/nextjs"
+import { useAuth } from "@clerk/nextjs";
 import { useQuery } from "@tanstack/react-query";
 
 
 
-async function fetchUserById(userId: string): Promise<User | null | undefined> {
-    return await getUserById(userId)
+async function fetchUser(id?: string | null, userId?: string | null) {
+    try {
+        if (!userId || !id) return null
+        const res = await fetch(`/api/users/${userId}`)
+        return res.json()
+    } catch (error) {
+        throw error
+    }
 }
 
-export function useCurrentUser() {
+export function useUser(id?: string | null) {
     const { userId } = useAuth()
     return useQuery({
-        queryKey: ["currentUser", userId],
-        queryFn: () => {
-            try {
-                if (userId) {
-                    return fetchUserById(userId)
-                }
-            } catch (error) {
-                console.log({ error })
-            }
-        },
+        queryKey: ["user", { userId }],
+        queryFn: () => { return fetchUser(id, userId) },
         enabled: !!userId,
     });
 }

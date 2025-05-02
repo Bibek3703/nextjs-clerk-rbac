@@ -1,45 +1,28 @@
 "use server"
 import { clerkClient } from "@clerk/nextjs/server";
-import { handleAuth } from "./auth";
-import { Organization } from "@/db/schema";
+import { InsertOrganization, Organization } from "@/db/schema";
 
 
-export async function createOrganization(organization: Organization) {
-    const session = await handleAuth()
-
-    if (!organization?.name) {
-        throw new Error("Organization name is required");
-    }
-
-    if (!session?.userId) {
-        throw new Error("User not authorized to create organization");
-    }
-
+export async function createOrganization(userId: string, organization: Partial<InsertOrganization>): Promise<Organization | undefined> {
     const client = await clerkClient()
-    const res = await client.organizations.createOrganization({ ...organization, createdBy: session.userId })
+    const res = await client.organizations.createOrganization({
+        name: organization?.name || "",
+        slug: organization?.slug || undefined,
+        createdBy: userId
+    })
 
-    return {
-        id: res.id,
-        name: res.name,
-        slug: res.slug,
-        clerkId: res.createdBy,
-        imageUrl: res.imageUrl || null,
+    if (res) {
+        return {
+            id: res.id,
+            name: res.name,
+            slug: res.slug,
+            userId: res.createdBy,
+            imageUrl: res.imageUrl || null,
+        } as Organization
     }
 }
 
-export async function updateOrganization(organizationId: string, organization: Organization) {
-    const session = await handleAuth()
-
-    if (!organization || !organizationId) {
-        throw new Error("Organization is required");
-    }
-
-    console.log({ session, organization })
-
-    if (!session?.userId || session.userId !== organization.clerkId) {
-        throw new Error("User not authorized to create organization");
-    }
-
+export async function updateOrganization(organizationId: string, organization: InsertOrganization): Promise<Organization> {
     const client = await clerkClient()
     const res = await client.organizations.updateOrganization(organizationId, { ...organization })
 
@@ -47,30 +30,16 @@ export async function updateOrganization(organizationId: string, organization: O
         id: res.id,
         name: res.name,
         slug: res.slug,
-        clerkId: res.createdBy,
         imageUrl: res.imageUrl || null,
-    }
+    } as Organization
 }
 
-export async function deleteOrganization(organizationId: string) {
-    const session = await handleAuth()
-
-    if (!organizationId) {
-        throw new Error("Organization id is required");
-    }
-
-    if (!session?.userId) {
-        throw new Error("User not authorized to create organization");
-    }
-
+export async function deleteOrganization(userId: string, organizationId: string): Promise<Organization> {
     const client = await clerkClient()
     const res = await client.organizations.deleteOrganization(organizationId)
 
     return {
         id: res.id,
-        name: res.name,
-        slug: res.slug,
-        clerkId: res.createdBy,
-        imageUrl: res.imageUrl || null,
-    }
+        userId: userId
+    } as Organization
 }

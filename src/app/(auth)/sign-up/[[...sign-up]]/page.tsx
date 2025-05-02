@@ -3,8 +3,9 @@ import React from 'react'
 
 function SignUpPage() {
     return (
-        <div>
+        <div className='w-full'>
             <SignUpForm />
+            {/* <div id="clerk-captcha" className="w-auto mx-auto mt-6" /> */}
         </div>
     )
 }

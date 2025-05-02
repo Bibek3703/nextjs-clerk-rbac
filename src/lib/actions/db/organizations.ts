@@ -1,85 +1,65 @@
 "use server"
 
 import { InsertOrganization, Organization, organizations } from "@/db/schema"
-import { handleAuth } from "../clerk/auth"
 import { db } from "@/db"
-import { desc, eq } from "drizzle-orm"
+import { and, desc, eq } from "drizzle-orm"
 
-export async function createUserOrganizations(
+// Get all organizations of user
+export async function getUserOrganizations(userId: string): Promise<Organization[] | undefined> {
+
+    return await db.select().from(organizations)
+        .where(eq(organizations.userId, userId))
+        .orderBy(desc(organizations.createdAt))
+
+}
+
+// Get single organization of user
+export async function getUserOrganization(userId: string, organizationId: string): Promise<Organization[] | undefined> {
+    return await db.select().from(organizations)
+        .where(and(
+            eq(organizations.userId, userId),
+            eq(organizations.id, organizationId)
+        ))
+        .orderBy(desc(organizations.createdAt))
+}
+
+// Create new organization for user
+export async function createUserOrganization(
+    userId: string,
     organization: InsertOrganization
-): Promise<InsertOrganization | null | undefined> {
+) {
 
-    // const session = await handleAuth()
-
-    if (!organization.clerkOrgId) {
-        throw new Error("Organization ID is required")
-    }
-
-    // if (clerkId !== session.userId) {
-    //     throw new Error("User is not authorized")
-    // }
-
-    await await db.insert(organizations)
+    return await db.insert(organizations)
         .values({
             ...organization,
             createdAt: new Date(),
             updatedAt: new Date(),
         });
-
-    return organization
 }
 
-export async function updateUserOrganizations(
-    clerkOrgId: string,
+// Update user's organization
+export async function updateUserOrganization(
+    userId: string,
+    organizationId: string,
     organization: Partial<Organization>
-): Promise<Partial<Organization> | null | undefined> {
+) {
 
-    // const session = await handleAuth()
-
-    if (!clerkOrgId) {
-        throw new Error("Organization ID is required")
-    }
-
-    // if (clerkId !== session.userId) {
-    //     throw new Error("User is not authorized")
-    // }
-
-    await db.update(organizations)
+    return await db.update(organizations)
         .set({
             ...organization,
             updatedAt: new Date(),
         })
-        .where(eq(organizations.clerkOrgId, clerkOrgId));
-
-    return organization
+        .where(and(
+            eq(organizations.id, organizationId),
+            eq(organizations.userId, userId)
+        ));
 }
 
-export async function deleteOrganizationByClerkOrgId(clerkOrgId: string) {
-    if (!clerkOrgId) {
-        throw new Error("Clerk organization ID is required");
-    }
-    await db.delete(organizations)
-        .where(eq(organizations.clerkOrgId, clerkOrgId));
-    return { message: "Organization deleted" }
+// Delete user's organization
+export async function deleteUserOrganization(organizationId: string) {
+
+    return await db.delete(organizations)
+        .where(eq(organizations.id, organizationId));
+
 }
 
-export async function getUserOrganizations(clerkId: string): Promise<Organization[] | null | undefined> {
-
-    const session = await handleAuth()
-
-    if (!clerkId) {
-        throw new Error("User ID is required")
-    }
-
-    if (clerkId !== session.userId) {
-        throw new Error("User is not authorized")
-    }
-
-    const result = await db.select().from(organizations).where(eq(organizations.clerkId, clerkId)).orderBy(desc(organizations.createdAt))
-    console.log({ result })
-    if (result?.length) {
-        return result
-    }
-
-    return null
-}

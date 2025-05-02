@@ -17,7 +17,8 @@ This guide outlines the step-by-step process to build a full-stack todo applicat
 3. [Database Setup with NeonDB](#3-database-setup-with-neondb)
 4. [Schema Design & Drizzle Integration](#4-schema-design--drizzle-integration)
 5. [Webhook Integration for Data Sync](#7-webhook-integration-for-data-sync)
-6. [Deployment & Testing](#10-deployment--testing)
+6. [Role-Based Access Control Implementation](#6-role-based-access-control-implementation)
+7. [Deployment & Testing](#10-deployment--testing)
 
 ## 1. Project Setup
 
@@ -409,4 +410,63 @@ NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL=/onboarding
         return NextResponse.json({ message: "Webhook received" }, { status: 200 });
     }
 
+    case "organization.created": {
+        const clerkOrg = evt.data;
+        if (id && clerkOrg && clerkOrg.created_by) {
+            await createUserOrganizations({
+                name: clerkOrg.name,
+                slug: clerkOrg.slug,
+                clerkOrgId: id,
+                membersCount: 1,
+                clerkId: clerkOrg.created_by,
+                imageUrl: clerkOrg?.image_url || ""
+            })
+        }
+        break;
+    }
+    case "organization.updated": {
+        const clerkOrg = evt.data;
+        if (id && clerkOrg && clerkOrg.created_by) {
+
+            await updateUserOrganizations(id, {
+                name: clerkOrg.name,
+                slug: clerkOrg.slug,
+                clerkOrgId: id,
+                clerkId: clerkOrg.created_by,
+                imageUrl: clerkOrg?.image_url || ""
+            })
+        }
+        break;
+    }
+    case "organization.deleted": {
+        if (id) {
+            console.log(`Deleting user with ID ${id}`);
+            await deleteOrganizationByClerkOrgId(id)
+        }
+        break;
+    }
+    case "organizationMembership.created":
+    case "organizationMembership.updated": {
+        const clerkOrgMembership = evt.data as OrganizationMembershipJSON & { role_name: Role };
+        console.log({ clerkOrgMembership })
+        await updateUserPublicMetadata(clerkOrgMembership.public_user_data.user_id, {
+            role: clerkOrgMembership.role,
+        })
+        await updateUserByClerkId({
+            role: clerkOrgMembership?.role_name,
+        }, clerkOrgMembership.public_user_data.user_id)
+        await updateUserOrganizations(clerkOrgMembership.organization.id, {
+            membersCount: clerkOrgMembership?.organization?.members_count || 0,
+        })
+    }
   ```
+
+## 6. [Role-Based Access Control Implementation](#6-role-based-access-control-implementation)
+
+### Design permission system
+#### - [Create clerk roles (Admin, User)](https://clerk.com/docs/organizations/create-roles-permissions#create-a-new-role-for-your-organization)
+#### - [Create clerk permissions (todos)](https://clerk.com/docs/organizations/create-roles-permissions#create-a-new-permission-for-your-organization)
+
+### Create RBAC middleware
+#### - Implement permission verification
+#### - Secure API endpoints with role checks

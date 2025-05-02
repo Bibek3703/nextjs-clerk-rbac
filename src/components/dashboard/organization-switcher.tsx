@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { ChevronsUpDown, GalleryVerticalEnd, Plus } from "lucide-react"
+import { ChevronsUpDown, Plus, Trash } from "lucide-react"
 
 import {
     DropdownMenu,
@@ -22,70 +22,96 @@ import Image from "next/image"
 import { DialogProvider } from "@/contexts/dialog-context"
 import { Button } from "../ui/button"
 import { DialogOrganization } from "./organizations/org-dialog"
-import { OrgType, useCurrentOrganization } from "@/hooks/use-organizations"
+import { useCurrentOrganization, useDeleteOrganization, useOrganizations } from "@/hooks/use-organizations"
 import { Skeleton } from "../ui/skeleton"
+import { Organization } from "@/db/schema"
+import { useAuth } from "@clerk/nextjs"
 
 
 
-export function OrganizationSwitcher({
-    teams,
-}: {
-    teams?: OrgType[]
-}) {
+export function OrganizationSwitcher() {
     const { isMobile } = useSidebar()
+    const { userId } = useAuth()
+    const { data, isLoading } = useOrganizations(userId)
     const setOrganization = useCurrentOrganization((state) => state.setOrganization)
-    const getOrganization = useCurrentOrganization((state) => state.getOrganization)
     const organization = useCurrentOrganization((state) => state.organization)
+    const { mutate: deleteOrganization } = useDeleteOrganization(userId)
+
 
     React.useEffect(() => {
-        if (teams && teams.length && !getOrganization()) {
-            setOrganization(teams[0])
+        if (userId && data?.organizations.length > 0 && !organization) {
+            console.log("cleared")
+            setOrganization(data?.organizations[0])
         }
-    }, [teams])
+    }, [userId, data?.organizations, organization])
 
+    const handleDeleteOrganization = async (id: string) => {
+        if (!id && userId) return
+        await deleteOrganization(id)
+        console.log({ organization, id })
+        if (organization && organization.id === id) {
+            await useCurrentOrganization.getState().clearStore()
+        }
+    }
+
+    if (!userId) return null
 
     return (
         <SidebarMenu>
             <SidebarMenuItem>
-                {teams && teams?.length > 0 ?
-                    <DropdownMenu>
+                {isLoading ?
+                    <SidebarMenuButton
+                        size="lg"
+                        className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+                    >
+                        <div className="flex items-center space-x-4">
+                            <Skeleton className="h-12 w-12 rounded-full" />
+                            <div className="space-y-2">
+                                <Skeleton className="h-4 w-[250px]" />
+                                <Skeleton className="h-4 w-[200px]" />
+                            </div>
+                        </div>
+                    </SidebarMenuButton>
+                    : <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                             <SidebarMenuButton
                                 size="lg"
                                 className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
                             >
                                 <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-                                    {getOrganization()?.logo && <Image src={getOrganization()?.logo ?? ""} className="size-4" alt="Logo" width={200} height={200} />}
+                                    {organization?.imageUrl && <Image src={organization?.imageUrl ?? ""} className="size-4" alt="Logo" width={200} height={200} />}
                                 </div>
                                 <div className="grid flex-1 text-left text-sm leading-tight">
                                     <span className="truncate font-semibold">
-                                        {getOrganization()?.name ?? ""}
+                                        {organization?.name ?? ""}
                                     </span>
-                                    <span className="truncate text-xs">{getOrganization()?.slug || ""}</span>
+                                    <span className="truncate text-xs">{organization?.slug || ""}</span>
                                 </div>
                                 <ChevronsUpDown className="ml-auto" />
                             </SidebarMenuButton>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent
+                        {data?.organizations && data?.organizations.length > 0 && <DropdownMenuContent
                             className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg"
                             align="start"
                             side={isMobile ? "bottom" : "right"}
                             sideOffset={4}
                         >
                             <DropdownMenuLabel className="text-xs text-muted-foreground">
-                                Teams
+                                organizations
                             </DropdownMenuLabel>
-                            {teams.map((team, index) => (
+                            {data?.organizations && data?.organizations.map((organization: Organization, index: number) => (
                                 <DropdownMenuItem
-                                    key={team.name}
-                                    onClick={() => setOrganization(team)}
+                                    key={organization.name}
+                                    onClick={() => setOrganization(organization)}
                                     className="gap-2 p-2"
                                 >
                                     <div className="flex size-6 items-center justify-center rounded-sm border">
-                                        {team?.logo && <Image src={team?.logo ?? ""} className="size-4" alt="Logo" width={200} height={200} />}
+                                        {organization?.imageUrl && <Image src={organization?.imageUrl ?? ""} className="size-4" alt="Logo" width={200} height={200} />}
                                     </div>
-                                    {team.name}
-                                    <DropdownMenuShortcut>⌘{index + 1}</DropdownMenuShortcut>
+                                    {organization.name}
+                                    <DropdownMenuShortcut>⌘{organization.membersCount}</DropdownMenuShortcut>
+
+
                                 </DropdownMenuItem>
                             ))}
                             <DropdownMenuSeparator />
@@ -102,22 +128,8 @@ export function OrganizationSwitcher({
                                     />
                                 </DialogProvider>
                             </DropdownMenuItem>
-                        </DropdownMenuContent>
-                    </DropdownMenu>
-                    :
-                    <SidebarMenuButton
-                        size="lg"
-                        className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
-                    >
-                        <div className="flex items-center space-x-4">
-                            <Skeleton className="h-12 w-12 rounded-full" />
-                            <div className="space-y-2">
-                                <Skeleton className="h-4 w-[250px]" />
-                                <Skeleton className="h-4 w-[200px]" />
-                            </div>
-                        </div>
-                    </SidebarMenuButton>
-                }
+                        </DropdownMenuContent>}
+                    </DropdownMenu>}
             </SidebarMenuItem>
         </SidebarMenu>
     )

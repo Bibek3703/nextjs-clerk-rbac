@@ -7,8 +7,7 @@ export const roleEnum = pgEnum("role", ["Admin", "Member"]);
 
 // Users Table
 export const users = pgTable("users", {
-    id: uuid("id").primaryKey().defaultRandom(),
-    clerkId: text("clerk_id").unique().notNull(),
+    id: text("id").notNull().primaryKey(),
     email: text("email").unique().notNull(),
     firstName: text("first_name"),
     lastName: text("last_name"),
@@ -23,9 +22,8 @@ export type InsertUser = typeof users.$inferInsert;
 
 // Organizations Table
 export const organizations = pgTable("organizations", {
-    id: uuid("id").primaryKey().defaultRandom(),
-    clerkId: text("clerk_id").notNull(),
-    clerkOrgId: text("clerk_org_id").unique().notNull(),
+    id: text("id").notNull().primaryKey(),
+    userId: text("user_id").notNull(),
     name: text("name").notNull(),
     slug: text("slug").notNull(),
     imageUrl: text("image_url"),
@@ -40,8 +38,8 @@ export type InsertOrganization = typeof organizations.$inferInsert;
 // Organization to User Junction Table
 export const organizationsToUsers = pgTable("organizations_to_users", {
     id: uuid("id").primaryKey().defaultRandom(),
-    organizationId: uuid("organization_id").notNull().references(() => organizations.id, { onDelete: "cascade" }),
-    userId: uuid("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+    organizationId: text("organization_id").notNull().references(() => organizations.id, { onDelete: "cascade" }),
+    userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at").defaultNow().notNull()
 });
@@ -56,8 +54,8 @@ export const todos = pgTable("todos", {
     description: text("description"),
     completed: boolean("completed").default(false).notNull(),
     dueDate: timestamp("due_date"),
-    userId: uuid("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
-    organizationId: uuid("organization_id").references(() => organizations.id, { onDelete: "cascade" }),
+    userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+    organizationId: text("organization_id").references(() => organizations.id, { onDelete: "cascade" }),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at").defaultNow().notNull()
 });

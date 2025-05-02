@@ -16,10 +16,12 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table"
+import { Skeleton } from "../ui/skeleton"
 
 interface DataTableProps<TData, TValue> {
     columns: ColumnDef<TData, TValue>[]
     data: TData[]
+    isLoading: boolean
     headerComponent?: (table: TanstackTable<TData>) => React.ReactNode
     footerComponent?: (table: TanstackTable<TData>) => React.ReactNode
 }
@@ -27,6 +29,7 @@ interface DataTableProps<TData, TValue> {
 export function DataTable<TData, TValue>({
     columns,
     data,
+    isLoading,
     headerComponent,
     footerComponent
 }: DataTableProps<TData, TValue>) {
@@ -59,7 +62,17 @@ export function DataTable<TData, TValue>({
                     ))}
                 </TableHeader>
                 <TableBody>
-                    {table.getRowModel().rows?.length ? (
+                    {isLoading ? Array.from({ length: 5 }).map(() => table.getHeaderGroups().map((headerGroup) => (
+                        <TableRow key={headerGroup.id}>
+                            {headerGroup.headers.map((header) => {
+                                return (
+                                    <TableCell key={header.id}>
+                                        <Skeleton className="w-full h-8" />
+                                    </TableCell>
+                                )
+                            })}
+                        </TableRow>
+                    ))) : table.getRowModel().rows?.length ? (
                         table.getRowModel().rows.map((row) => (
                             <TableRow
                                 key={row.id}

@@ -10,7 +10,7 @@ import { DataTable } from '../data-table'
 
 function OrgDataTable() {
     const { userId } = useAuth()
-    const { data } = useOrganizations(userId)
+    const { data, isLoading, isFetching } = useOrganizations(userId)
 
     const renderHeaderComponent = (table: Table<Organization>) => {
         return <TableHeader table={table} />
@@ -19,8 +19,9 @@ function OrgDataTable() {
     return (
         <DataTable
             columns={columns}
-            data={data || []}
+            data={data?.organizations || []}
             headerComponent={renderHeaderComponent}
+            isLoading={isFetching || isLoading}
         />
     )
 }

@@ -5,7 +5,8 @@ export default function Page() {
     // Handle the redirect flow by calling the Clerk.handleRedirectCallback() method
     // or rendering the prebuilt <AuthenticateWithRedirectCallback/> component.
     // This is the final step in the custom OAuth flow.
-    return <>
+    return <div>
         <AuthenticateWithRedirectCallback />
-    </>
+        {/* <div id="clerk-captcha" className="w-auto mx-auto mt-6" /> */}
+    </div>
 }

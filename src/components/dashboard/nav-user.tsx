@@ -32,6 +32,7 @@ import {
 import { User } from "@/db/schema"
 import { useClerk } from "@clerk/nextjs"
 import { useCurrentOrganization } from "@/hooks/use-organizations"
+import Link from "next/link"
 
 export function NavUser({
     user,
@@ -97,9 +98,11 @@ export function NavUser({
                         </DropdownMenuGroup>
                         <DropdownMenuSeparator />
                         <DropdownMenuGroup>
-                            <DropdownMenuItem>
-                                <BadgeCheck />
-                                Account
+                            <DropdownMenuItem asChild>
+                                <Link href="/settings">
+                                    <BadgeCheck />
+                                    Account
+                                </Link>
                             </DropdownMenuItem>
                             <DropdownMenuItem disabled>
                                 <CreditCard />

@@ -145,7 +145,6 @@ function SignUpForm({
                     </div>
                 </CardContent>
             </Card>
-
         </div>
     )
 }

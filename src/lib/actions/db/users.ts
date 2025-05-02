@@ -3,29 +3,20 @@
 import { db } from "@/db";
 import { InsertUser, User, users } from "@/db/schema";
 import { eq } from "drizzle-orm";
-import { handleAuth } from "../clerk/auth";
 
-export async function getUserById(userId?: string): Promise<User | null | undefined> {
+export async function getUsers(): Promise<User[] | undefined> {
+    return await db.select().from(users) as User[]
+}
 
-    await handleAuth()
-
-    if (!userId) {
-        throw new Error("User ID is required")
-    }
-
-    const result = await db.select().from(users).where(eq(users.clerkId, userId)).limit(1)
+export async function getUser(userId: string): Promise<User | undefined> {
+    const result = await db.select().from(users).where(eq(users.id, userId)).limit(1)
 
     if (result?.length) {
-        return result[0]
+        return result[0] as User
     }
-
-    return null
 }
 
 export async function createUser(user: InsertUser) {
-    if (!user?.clerkId) {
-        throw new Error("Clerk user ID is required");
-    }
     await db.insert(users)
         .values({
             ...user,
@@ -35,24 +26,18 @@ export async function createUser(user: InsertUser) {
     return { message: "User created" }
 }
 
-export async function updateUserByClerkId(user: Partial<InsertUser>, clerkId: string) {
-    if (!clerkId) {
-        throw new Error("Clerk user ID is required");
-    }
+export async function updateUser(userId: string, user: Partial<InsertUser>) {
     await db.update(users)
         .set({
             ...user,
             updatedAt: new Date(),
         })
-        .where(eq(users.clerkId, clerkId));
+        .where(eq(users.id, userId));
     return { message: "User updated" }
 }
 
-export async function deleteUserByClerkId(clerkId: string) {
-    if (!clerkId) {
-        throw new Error("Clerk user ID is required");
-    }
+export async function deleteUserByClerkId(userId: string) {
     await db.delete(users)
-        .where(eq(users.clerkId, clerkId));
+        .where(eq(users.id, userId));
     return { message: "User deleted" }
 }

@@ -2,7 +2,7 @@
 
 import { Organization } from "@/db/schema"
 import { ColumnDef } from "@tanstack/react-table"
-import TeamActions from "./team-actions"
+import OrganizationActions from "./org-actions"
 
 export const columns: ColumnDef<Organization>[] = [
     {
@@ -27,7 +27,7 @@ export const columns: ColumnDef<Organization>[] = [
         cell: ({ row }) => {
             const team = row.original
 
-            return <TeamActions team={team} />
+            return <OrganizationActions team={team} />
         },
     },
 ]

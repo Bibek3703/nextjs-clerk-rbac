@@ -8,6 +8,7 @@ import {
     GalleryVerticalEnd,
     LayoutDashboard,
     Settings2,
+    Users,
 } from "lucide-react"
 
 import {
@@ -19,12 +20,13 @@ import {
 } from "@/components/ui/sidebar"
 import { NavUser } from "./nav-user"
 import { NavMain } from "./nav-main"
-import { useCurrentUser } from "@/hooks/use-users"
+import { useUser } from "@/hooks/use-users"
 import { OrganizationSwitcher } from "./organization-switcher"
 import { useOrganizations } from "@/hooks/use-organizations"
+import { useAuth } from "@clerk/nextjs"
 
 // This is sample data.
-const data = {
+const menus = {
     teams: [
         {
             name: "Acme Inc",
@@ -48,7 +50,11 @@ const data = {
             url: "/dashboard",
             icon: LayoutDashboard,
         },
-
+        {
+            title: "Members",
+            url: "/members",
+            icon: Users,
+        },
         {
             title: "Todos",
             url: "/todos",
@@ -67,33 +73,34 @@ const data = {
                     title: "Organizations",
                     url: "/settings/organizations",
                 },
-                {
-                    title: "Billing",
-                    url: "#",
-                },
-                {
-                    title: "Limits",
-                    url: "#",
-                },
+                // {
+                //     title: "Billing",
+                //     url: "#",
+                // },
+                // {
+                //     title: "Limits",
+                //     url: "#",
+                // },
             ],
         },
     ],
 }
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-    const { data: user } = useCurrentUser()
-    const { data: teams } = useOrganizations(user?.clerkId)
+    const { userId } = useAuth()
+    const { data } = useUser(userId)
+
 
     return (
         <Sidebar collapsible="icon" {...props}>
             <SidebarHeader>
-                <OrganizationSwitcher teams={teams && teams?.length > 0 ? teams?.map((team) => ({ name: team.name, slug: team.slug, logo: team.imageUrl })) : []} />
+                <OrganizationSwitcher />
             </SidebarHeader>
             <SidebarContent>
-                <NavMain items={data.navMain} />
+                <NavMain items={menus.navMain} />
             </SidebarContent>
             <SidebarFooter>
-                <NavUser user={user} />
+                {data?.user && <NavUser user={data?.user} />}
             </SidebarFooter>
             <SidebarRail />
         </Sidebar>

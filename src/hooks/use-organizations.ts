@@ -1,126 +1,173 @@
 "use client"
 
-import { Organization, organizations } from "@/db/schema";
-import { createOrganization, deleteOrganization, updateOrganization } from "@/lib/actions/clerk/organizations";
-import { getUserOrganizations } from "@/lib/actions/db/organizations";
+import { Organization } from "@/db/schema";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { create } from "zustand";
-import { persist, createJSONStorage } from "zustand/middleware";
+import { persist } from "zustand/middleware";
 
-async function addOrganization(organization: Organization) {
-    return createOrganization(organization)
+export async function fetchUserOrganizations(userId?: string | null) {
+    if (!userId) return null
+    const res = await fetch(`/api/users/${userId}/organizations`)
+    const responseData = await res.json()
+    return responseData
 }
 
-async function modifyOrganization({ organizationId, organization }: { organizationId: string, organization: Organization }) {
-    return updateOrganization(organizationId, organization)
+
+export function useOrganizations(userId?: string | null) {
+    return useQuery({
+        queryFn: async () => await fetchUserOrganizations(userId),
+        queryKey: ["organizations"],
+        enabled: !!userId
+    });
 }
 
-async function removeOrganization(organizationId: string) {
-    return deleteOrganization(organizationId)
+
+async function fetchUserOrganization(organizationId: string, userId?: string | null,) {
+    if (!userId) return null
+    const res = await fetch(`/api/users/${userId}/organizations/${organizationId}`)
+    const responseData = await res.json()
+    if (res.ok) {
+        return responseData
+    }
+    throw new Error(responseData?.error || "Something went wrong")
 }
 
-async function fetchTeams(userId?: string | null) {
-    if (!userId) return
-    return getUserOrganizations(userId)
+
+export function useOrganization(organizationId: string, userId?: string | null) {
+    return useQuery({
+        queryKey: ["organizations"],
+        queryFn: async () => await fetchUserOrganization(organizationId, userId,),
+    });
 }
 
-export function useCreateOrganization() {
+async function createOrganization(data: Organization, userId?: string | null) {
+    try {
+        if (!userId) return null
+        const res = await fetch(`/api/users/${userId}/organizations`, {
+            method: "POST",
+            body: JSON.stringify(data)
+        })
+        const responseData = await res.json()
+        if (res.ok) {
+            return responseData
+        }
+        throw new Error(responseData?.error || "Something went wrong")
+    } catch (error) {
+        throw error
+    }
+}
+
+export function useCreateOrganization(userId?: string | null) {
     const queryClient = useQueryClient();
-
     return useMutation({
-        mutationFn: addOrganization,
+        mutationFn: async (data: Organization) => await createOrganization(data, userId),
         onSuccess: (data) => {
-            queryClient.invalidateQueries({ queryKey: ["organizations"] },);
-            if (data) {
-                queryClient.invalidateQueries({ queryKey: ["organizations"] });
+            queryClient.invalidateQueries({ queryKey: ["organizations"] });
+            if (data?.id) {
+                queryClient.invalidateQueries({
+                    queryKey: ["organizations"]
+                });
+                toast.success("Organization created successfully");
             }
-            toast.success("Organization created successfully");
         },
         onError: (error: Error) => {
-            console.log({ error })
             toast.error(error.message);
         },
     });
 }
 
-export function useUpdateOrganization() {
-    const queryClient = useQueryClient();
+async function updateOrganization(
+    organizationId: string,
+    data: Organization,
+    userId?: string | null,
+) {
+    try {
+        if (!userId) return null
+        const res = await fetch(`/api/users/${userId}/organizations/${organizationId}`, {
+            method: "PUT",
+            body: JSON.stringify(data)
+        })
+        const responseData = await res.json()
+        if (res.ok) {
+            return responseData
+        }
+        throw new Error(responseData?.error || "Something went wrong")
+    } catch (error) {
+        throw error
+    }
+}
 
+export function useUpdateOrganization(userId?: string | null) {
+    const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: modifyOrganization,
+        mutationFn: async (data: Organization) => await updateOrganization(data.id, data, userId),
         onSuccess: (data) => {
-            queryClient.invalidateQueries({ queryKey: ["organizations"] });
-            if (data) {
-                queryClient.invalidateQueries({ queryKey: ["organizations"], });
+            queryClient.invalidateQueries({
+                queryKey: ["organizations"]
+            });
+            if (data?.id) {
+                queryClient.invalidateQueries({
+                    queryKey: ["organizations"]
+                });
+                toast.success("Organization update successfully");
             }
-            toast.success("Organization update successfully");
         },
         onError: (error: Error) => {
-            console.log({ error })
             toast.error(error.message);
         },
     });
 }
 
-export function useDeleteOrganization() {
-    const queryClient = useQueryClient();
+async function deleteOrganization(organizationId: string, userId?: string | null,) {
+    if (!userId) return null
+    const res = await fetch(`/api/users/${userId}/organizations/${organizationId}`, {
+        method: "DELETE"
+    })
+    const responseData = await res.json()
+    if (res.ok) {
+        return responseData
+    }
+    throw new Error(responseData?.error || "Something went wrong")
+}
 
+export function useDeleteOrganization(userId?: string | null) {
+    const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: removeOrganization,
+        mutationFn: async (organizationId: string) => await deleteOrganization(organizationId, userId),
         onSuccess: (data) => {
-            queryClient.invalidateQueries({ queryKey: ["organizations"] });
+            queryClient.invalidateQueries({
+                queryKey: ["organizations"],
+            });
             if (data) {
-                queryClient.invalidateQueries({ queryKey: ["organizations"] });
+                queryClient.invalidateQueries({
+                    queryKey: ["organizations"],
+                });
                 toast.success("Organization deleted successfully");
             }
         },
         onError: (error: Error) => {
             toast.error(error.message);
-            throw error;
         },
     });
 }
 
-export function useOrganizations(userId?: string | null) {
-    return useQuery({
-        queryKey: ["organizations", userId],
-        queryFn: () => fetchTeams(userId),
-        enabled: !!userId,
-    });
-}
 
-export type OrgType = {
-    name: string
-    logo: string | null
-    slug: string
-}
+
+
 
 interface OrganizationState {
-    organization?: OrgType | null;
-    setOrganization: (org: OrgType) => void;
-    getOrganization: () => OrgType;
+    organization?: Organization | null;
+    setOrganization: (org: Organization) => void;
+    // getOrganization: () => OrgType;
     clearStore: () => void;
 }
 
 export const useCurrentOrganization = create<OrganizationState>()(
     persist(
-        (set, get) => ({
-            getOrganization: () => {
-                // Get organization from localStorage
-                const storageValue = localStorage.getItem('org-storage');
-                if (storageValue) {
-                    try {
-                        const parsed = JSON.parse(storageValue);
-                        return parsed.state?.organization || null;
-                    } catch (e) {
-                        console.error('Failed to parse organization from localStorage', e);
-                        return null;
-                    }
-                }
-                return get().organization;
-            },
-            setOrganization: (org: OrgType) => {
+        (set) => ({
+            organization: null,
+            setOrganization: (org: Organization) => {
                 set(() => ({
                     organization: org
                 }));
@@ -129,18 +176,6 @@ export const useCurrentOrganization = create<OrganizationState>()(
         }),
         {
             name: "org-storage", // unique name for the localStorage key
-            storage: createJSONStorage(() => localStorage),
-            partialize: (state) => ({
-                // Store these properties in localStorage
-                organization: state.organization,
-            }),
-            // Handle rehydration of non-serializable objects 
-            onRehydrateStorage: () => (state) => {
-                // Ensure audioPlayer is properly initialized after rehydration
-                if (state) {
-                    state.organization = null;
-                }
-            },
         }
     )
 )

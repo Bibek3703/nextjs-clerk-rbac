@@ -3,8 +3,9 @@ import React from 'react'
 
 function SignInPage() {
     return (
-        <div>
+        <div className='w-full'>
             <SignInForm />
+            {/* <div id="clerk-captcha" className="w-auto mx-auto mt-6" /> */}
         </div>
     )
 }
